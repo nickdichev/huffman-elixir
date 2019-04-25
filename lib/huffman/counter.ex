@@ -8,7 +8,7 @@ defmodule Huffman.Counter do
     iex> Huffman.Counter.count_words(["apple", "toast", "apple"])
     %{"apple" => 2, "toast" => 1}
   """
-  @spec list(binary) :: map()
+  @spec count_words(list(binary())) :: map()
   def count_words(word_list), do: count(word_list, %{})
 
   defp count([], acc), do: acc
