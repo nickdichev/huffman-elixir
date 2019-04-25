@@ -3,6 +3,8 @@ defmodule Huffman.CounterTest do
   alias Huffman.Counter
   doctest Huffman.Counter
 
+  @moduledoc false
+
   test "counts basic list" do
     result = Counter.count_words(["apple", "toast", "aardvark", "toast"])
     assert %{"apple" => 1, "toast" => 2, "aardvark" => 1} == result
