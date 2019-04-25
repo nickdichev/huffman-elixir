@@ -19,7 +19,8 @@ defmodule Huffman.MixProject do
 
   defp deps do
     [
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 0.5.1"}
     ]
   end
 end
