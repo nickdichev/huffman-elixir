@@ -3,6 +3,7 @@ defmodule Huffman.Counter do
 
   @moduledoc false
 
+  @spec merge_maps(map(), map()) :: map()
   defp merge_maps(x, y), do: Map.merge(x, y, fn _k, v1, v2 -> v2 + v1 end)
 
   @doc """
@@ -25,10 +26,13 @@ defmodule Huffman.Counter do
     iex> Huffman.Counter.count(["apple", "toast", "apple"])
     %{"apple" => 2, "toast" => 1}
   """
+  @spec count([iodata()]) :: map()
   def count(words) when is_list(words), do: count(words, %{})
 
+  @spec count([], map()) :: map()
   defp count([], acc), do: acc
 
+  @spec count([iodata(), ...], map()) :: map()
   defp count([head | tail], acc) do
     acc = Map.update(acc, head, 1, &(&1 + 1))
     count(tail, acc)
