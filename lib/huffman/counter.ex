@@ -1,15 +1,31 @@
 defmodule Huffman.Counter do
+  alias __MODULE__
+
   @moduledoc false
+
+  defp merge_maps(x, y), do: Map.merge(x, y, fn _k, v1, v2 -> v2 + v1 end)
+
+  @doc """
+  Counts the number of unique words in a file and returns the count in a map in the format %{word => count}.
+  """
+  @spec count(binary()) :: map()
+  def count(filename) when is_binary(filename) do
+    filename
+    |> File.stream!()
+    |> Stream.map(&String.split(&1, ~r"\b"))
+    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
+    |> Stream.map(&Counter.count(&1))
+    |> Enum.reduce(&merge_maps(&1, &2))
+  end
 
   @doc """
   Counts the number of unique words in a list and returns the count in a map in the format %{word => count}.
 
   ## Examples
-    iex> Huffman.Counter.count_words(["apple", "toast", "apple"])
+    iex> Huffman.Counter.count(["apple", "toast", "apple"])
     %{"apple" => 2, "toast" => 1}
   """
-  @spec count_words(list(binary())) :: map()
-  def count_words(word_list), do: count(word_list, %{})
+  def count(words) when is_list(words), do: count(words, %{})
 
   defp count([], acc), do: acc
 
