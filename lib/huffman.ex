@@ -1,0 +1,2 @@
+defmodule Huffman do
+end
