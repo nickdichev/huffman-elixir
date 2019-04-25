@@ -1,5 +1,6 @@
 defmodule Huffman.MixProject do
   use Mix.Project
+  @moduledoc false
 
   def project do
     [
