@@ -5,6 +5,9 @@ defmodule Huffman.Tree do
   @type priority_queue :: list(tree_node())
   @type tree_node :: %Huffman.TreeNode{}
 
+  @doc """
+  Flattens a Huffman priority queue into a single %Huffman.TreeNode{}.
+  """
   @spec from_priority_queue(priority_queue()) :: tree_node()
   def from_priority_queue(queue), do: flatten(queue)
 
