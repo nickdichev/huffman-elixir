@@ -4,8 +4,8 @@ defmodule Huffman.PriorityQueue do
   @type priority_queue :: list(queue_elem())
   @type queue_elem :: {iodata(), integer()}
 
-  # Private function to sort a priority queue. This function is called when we initially 
-  # build the queue, and when elements are inserted. The function is private since we 
+  # Private function to sort a priority queue. This function is called when we initially
+  # build the queue, and when elements are inserted. The function is private since we
   # should _always_ return a queue sorted by weight to the caller.
   @spec sort(priority_queue()) :: priority_queue()
   defp sort([]), do: []
@@ -42,7 +42,6 @@ defmodule Huffman.PriorityQueue do
   @spec pop(priority_queue()) :: {queue_elem(), priority_queue()} | {}
   def pop([]), do: {}
   def pop([head | tail]), do: {head, tail}
-
 
   @doc """
   Inserts an element onto the priority queue.
