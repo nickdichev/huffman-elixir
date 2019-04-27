@@ -6,7 +6,14 @@ defmodule Huffman.PriorityQueueTest do
 
   test "creates queue from populated map" do
     result = PriorityQueue.from_map(%{"a" => 4, "b" => 1, "c" => 0})
-    assert [{"c", 0}, {"b", 1}, {"a", 4}] == result
+
+    expected = [
+      %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0},
+      %Huffman.TreeNode{character: "b", left: nil, right: nil, weight: 1},
+      %Huffman.TreeNode{character: "a", left: nil, right: nil, weight: 4}
+    ]
+
+    assert expected == result
   end
 
   test "creates queue from empty map" do
@@ -15,8 +22,30 @@ defmodule Huffman.PriorityQueueTest do
   end
 
   test "pops off populated queue" do
-    result = PriorityQueue.pop([{"c", 0}, {"a", 3}, {"b", 5}])
-    assert {{"c", 0}, [{"a", 3}, {"b", 5}]} = result
+    result = PriorityQueue.pop([
+      %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0},
+      %Huffman.TreeNode{character: "b", left: nil, right: nil, weight: 1},
+      %Huffman.TreeNode{character: "a", left: nil, right: nil, weight: 4}
+    ])
+
+    expected = {
+      %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0},
+      [
+        %Huffman.TreeNode{
+          character: "b",
+          left: nil,
+          right: nil,
+          weight: 1
+        },
+        %Huffman.TreeNode{
+          character: "a",
+          left: nil,
+          right: nil,
+          weight: 4
+        }
+    ]}
+
+    assert expected == result
   end
 
   test "pops off empty queue" do
@@ -25,12 +54,23 @@ defmodule Huffman.PriorityQueueTest do
   end
 
   test "insert element into a queue" do
-    result = Huffman.PriorityQueue.insert([{"a", 3}], {"b", 0})
-    assert [{"b", 0}, {"a", 3}] == result
+    initial_queue = [%Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0}]
+    new_elem = %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0}
+
+    result = Huffman.PriorityQueue.insert(initial_queue, new_elem)
+
+    expected = [
+      %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0},
+      %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0}
+    ]
+
+    assert expected == result
   end
 
   test "insert element into empty queue" do
-    result = Huffman.PriorityQueue.insert([], {"b", 0})
-    assert [{"b", 0}] == result
+    new_elem = %Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0}
+    result = Huffman.PriorityQueue.insert([], new_elem)
+    expected = [%Huffman.TreeNode{character: "c", left: nil, right: nil, weight: 0}]
+    assert expected == result
   end
 end
