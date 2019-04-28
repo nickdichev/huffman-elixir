@@ -18,26 +18,22 @@ defmodule Huffman do
     # Get the character counts for the input. Used to write the header and to build the tree
     char_counts = Counter.count(iolist)
 
-    # We will use `term_to_binary/2` to generate our header. The header will be used for
-    # decompression. The header will be read and the Huffman tree can be recreated.
-    header_data = :erlang.term_to_binary(char_counts, compressed: 9)
-    header_length = byte_size(header_data)
+    # Generate the Huffman header that will be used for decompression
+    {header, header_len} = Header.get_header(char_counts)
 
-    compressed_body =
+    # Generate the compressed "body"
+    body =
       char_counts
-      |> get_huffman_tree()
+      |> PriorityQueue.from_map()
+      |> Tree.from_priority_queue()
       |> Tree.inorder()
       |> compressed_output(iolist)
       |> Stream.flat_map(&List.flatten/1)
       |> Enum.to_list()
       |> IOHelper.buffer_output(<<>>, [])
-  end
 
-  # Create a Huffman tree from a character counts map
-  defp get_huffman_tree(char_counts) do
-    char_counts
-    |> PriorityQueue.from_map()
-    |> Tree.from_priority_queue()
+    # Write the header length in the first 32 bits, then the header, then the compressed body
+    [<<header_len::size(32)>>, header, body]
   end
 
   # Convert some input into its Huffman encoded representation line-by-line

@@ -24,7 +24,6 @@ defmodule Huffman.Counter do
     |> Enum.reduce(&merge_maps(&1, &2))
   end
 
-
   @spec count_helper([], map()) :: map()
   defp count_helper([], acc), do: acc
 
