@@ -1,5 +1,5 @@
 defmodule Huffman do
-  alias Huffman.{Counter, PriorityQueue, Tree, IOHelper}
+  alias Huffman.{Counter, IOHelper, PriorityQueue, Tree}
   @moduledoc false
 
   @spec compress(binary()) :: map()
