@@ -40,7 +40,7 @@ defmodule Huffman.Tree do
     {:ok, agent} = Agent.start(fn -> %{} end)
 
     # Actually do the recursion, passing in the agent to keep track of state
-    inorder(root, [], agent)
+    inorder(root, <<>>, agent)
 
     # Get the final state of the map
     encoding_map = Agent.get(agent, fn state -> state end)
@@ -51,13 +51,13 @@ defmodule Huffman.Tree do
   end
 
   # Base of the recursion, we are at a leaf node when :left and :right are nil
-  defp inorder(%{left: nil, right: nil} = node, iolist, agent) do
-    Agent.update(agent, &Map.put(&1, node.character, iolist))
+  defp inorder(%{left: nil, right: nil} = node, encoding, agent) do
+    Agent.update(agent, &Map.put(&1, node.character, encoding))
   end
 
-  defp inorder(node, iolist, agent) do
-    inorder(node.left, [iolist, <<0 :: size(1)>>], agent)
-    inorder(node.right, [iolist, <<1 :: size(1)>>], agent)
+  defp inorder(node, encoding, agent) do
+    inorder(node.left, <<encoding::bitstring, <<0::size(1)>>::bitstring>>, agent)
+    inorder(node.right, <<encoding::bitstring, <<1::size(1)>>::bitstring>>, agent)
   end
 
 end

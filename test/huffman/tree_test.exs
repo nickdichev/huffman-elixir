@@ -39,13 +39,7 @@ defmodule Huffman.TreeTest do
   test "gets encodings from a Huffman tree", %{queue: queue} do
     root = Tree.from_priority_queue(queue)
     encodings = Tree.inorder(root)
-
-    expected = %{
-      "a" => [[[], <<0::size(1)>>], <<1::size(1)>>],
-      "b" => [[[[], <<0::size(1)>>], <<0::size(1)>>], <<0::size(1)>>],
-      "c" => [[[[], <<0::size(1)>>], <<0::size(1)>>], <<1::size(1)>>],
-      "d" => [[], <<1::size(1)>>]
-    }
+    expected = %{"a" => <<1::size(2)>>, "b" => <<0::size(3)>>, "c" => <<1::size(3)>>, "d" => <<1::size(1)>>}
 
     assert expected == encodings
   end
