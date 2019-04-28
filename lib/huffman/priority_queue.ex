@@ -10,7 +10,6 @@ defmodule Huffman.PriorityQueue do
   # should _always_ return a queue sorted by weight to the caller.
   defp sort([]), do: []
   defp sort(queue), do: Enum.sort(queue, &sort(&1, &2))
-  defp sort({_, weight_left}, {_, weight_right}), do: weight_left <= weight_right
   defp sort(%{weight: weight_left}, %{weight: weight_right}), do: weight_left <= weight_right
 
   @doc """
@@ -31,8 +30,8 @@ defmodule Huffman.PriorityQueue do
   def from_map(char_counts) when is_map(char_counts) do
     char_counts
     |> Enum.into([])
-    |> sort()
     |> Enum.map(&TreeNode.from_tuple(&1))
+    |> sort()
   end
 
   @doc """
