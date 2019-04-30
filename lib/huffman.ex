@@ -2,6 +2,9 @@ defmodule Huffman do
   alias Huffman.{Counter, Header, IOHelper, PriorityQueue, Tree}
   @moduledoc false
 
+  @header_length 32
+  @bits_per_byte 8
+
   @spec compress(binary()) :: map()
   def compress_file(filename) when is_binary(filename) do
     compressed_data =
@@ -19,7 +22,7 @@ defmodule Huffman do
     char_counts = Counter.count(iolist)
 
     # Generate the Huffman header that will be used for decompression
-    {header, header_len} = Header.get_header(char_counts)
+    {header, header_num_bytes} = Header.get_header(char_counts)
 
     # Generate the compressed "body"
     body =
@@ -28,12 +31,11 @@ defmodule Huffman do
       |> Tree.from_priority_queue()
       |> Tree.inorder()
       |> compressed_output(iolist)
-      |> Stream.flat_map(&List.flatten/1)
       |> Enum.to_list()
       |> IOHelper.buffer_output(<<>>, [])
 
     # Write the header length in the first 32 bits, then the header, then the compressed body
-    [<<header_len::size(32)>>, header, body]
+    [<<header_num_bytes::size(@header_length)>>, header, body]
   end
 
   # Convert some input into its Huffman encoded representation line-by-line
@@ -41,9 +43,45 @@ defmodule Huffman do
     iodata
     |> Stream.map(&String.split(&1, ""))
     |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
-    |> Stream.map(&encode_characters(&1, encodings))
+    |> Stream.map(&IOHelper.encode_characters(&1, encodings))
+    |> Stream.flat_map(&List.flatten/1)
   end
 
-  # Replace a list of characters with their encodings
-  defp encode_characters(iodata, encodings), do: Enum.map(iodata, &Map.get(encodings, &1))
+  def decompress_file(filename) do
+    decompressed_data =
+      filename
+      |> File.read!()
+      |> decompress()
+
+    File.write!(filename <> ".orig", decompressed_data)
+  end
+
+  def decompress(<<header_bytes::size(32), rest::binary>> = iodata) do
+    header_bit_len = header_bytes * @bits_per_byte
+    <<header::size(header_bit_len), body::binary>> = rest
+
+    char_counts = Header.from_binary(<<header::size(header_bit_len)>>)
+
+    root =
+      char_counts
+      |> PriorityQueue.from_map()
+      |> Tree.from_priority_queue()
+
+    decompressed_output(body, root, root, [])
+  end
+
+  def decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
+    decompressed_output(rest, root, root, [iolist, node.character])
+  end
+
+  def decompressed_output(<<1::size(1), rest::bitstring>>, root, node, iolist) do
+    decompressed_output(rest, root, node.right, iolist)
+  end
+
+  def decompressed_output(<<0::size(1), rest::bitstring>>, root, node, iolist) do
+    decompressed_output(rest, root, node.left, iolist)
+  end
+
+  def decompressed_output(<<>>, _root, _tree_node, iolist), do: iolist
+
 end

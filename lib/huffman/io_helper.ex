@@ -13,13 +13,13 @@ defmodule Huffman.IOHelper do
     # If we have, update the iolist accumulator that is the "final" output
     {byte, rest} = completed_byte(buffer)
     {buffer, iolist} =
-      # There's a completed byte on the front of the buffer, append it into the iolist
-      # and use the rest of the buffer in the next recursion
       if byte != nil and rest != nil do
+        # There's a completed byte on the front of the buffer, append it into the iolist
+        # and use the rest of the buffer in the next recursion
         {rest, [iolist, byte]}
-      # There's an uncompleted byte on the front of the buffer,
-      # use the current buffer and iolist for the next recursion
       else
+        # There's an uncompleted byte on the front of the buffer,
+        # use the current buffer and iolist for the next recursion
         {buffer, iolist}
       end
 
@@ -48,4 +48,7 @@ defmodule Huffman.IOHelper do
   # Check if there's a full byte on the front of the buffer, if so return that byte, and the "rest"
   def completed_byte(<<byte::size(8), rest::bitstring>>), do: {byte, rest}
   def completed_byte(_), do: {nil, nil}
+
+  # Replace a list of characters with their encodings
+  def encode_characters(iodata, encodings), do: Enum.map(iodata, &Map.get(encodings, &1))
 end
