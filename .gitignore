@@ -24,3 +24,6 @@ huffman-*.tar
 
 # Ignore vscode language server 
 .elixir_ls/
+
+# Ignore compressed/decompressed test data
+test_data/*.hf*

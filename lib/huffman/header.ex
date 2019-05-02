@@ -8,4 +8,8 @@ defmodule Huffman.Header do
     term_len = byte_size(binary_term)
     {binary_term, term_len}
   end
+
+  def from_binary(binary) do
+    :erlang.binary_to_term(binary)
+  end
 end

@@ -2,7 +2,10 @@ defmodule Huffman do
   alias Huffman.{Counter, Header, IOHelper, PriorityQueue, Tree}
   @moduledoc false
 
-  @spec compress(binary()) :: map()
+  @header_length 32
+  @bits_per_byte 8
+
+  @spec compress_file(binary()) :: :ok
   def compress_file(filename) when is_binary(filename) do
     compressed_data =
       filename
@@ -16,34 +19,62 @@ defmodule Huffman do
 
   def compress(iolist) do
     # Get the character counts for the input. Used to write the header and to build the tree
-    char_counts = Counter.count(iolist)
+    # We also need to add the EOF so we can get an encoding for it, and store it in the header
+    char_counts =
+      iolist
+      |> Counter.count()
+      |> Map.put(<<255>>, 1)
 
     # Generate the Huffman header that will be used for decompression
-    {header, header_len} = Header.get_header(char_counts)
+    {header, header_num_bytes} = Header.get_header(char_counts)
 
-    # Generate the compressed "body"
-    body =
+    # Generate the Huffman encodings from the character counts
+    encodings =
       char_counts
       |> PriorityQueue.from_map()
       |> Tree.from_priority_queue()
       |> Tree.inorder()
-      |> compressed_output(iolist)
-      |> Stream.flat_map(&List.flatten/1)
+
+    # Generate the compressed output from the encodings/input data
+    {body, buffer} =
+      encodings
+      |> IOHelper.compressed_output(iolist)
       |> Enum.to_list()
       |> IOHelper.buffer_output(<<>>, [])
 
-    # Write the header length in the first 32 bits, then the header, then the compressed body
-    [<<header_len::size(32)>>, header, body]
+    # There might be something leftover in the buffer, lets grab that bitstring,
+    # append the EOF, and pad if neccessary
+    eof_encoding = Map.get(encodings, <<255>>)
+    eof = IOHelper.pad_bitstring(<<buffer::bitstring, eof_encoding::bitstring>>)
+
+    [<<header_num_bytes::size(@header_length)>>, header, body, eof]
   end
 
-  # Convert some input into its Huffman encoded representation line-by-line
-  defp compressed_output(encodings, iodata) do
-    iodata
-    |> Stream.map(&String.split(&1, ""))
-    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
-    |> Stream.map(&encode_characters(&1, encodings))
+  def decompress_file(filename) do
+    decompressed_data =
+      filename
+      |> File.read!()
+      |> decompress()
+
+    File.write!(filename <> ".orig", decompressed_data)
   end
 
-  # Replace a list of characters with their encodings
-  defp encode_characters(iodata, encodings), do: Enum.map(iodata, &Map.get(encodings, &1))
+  def decompress([header_bytes, header, iodata] = iolist) when is_list(iolist) do
+    body_binary = IO.iodata_to_binary(iodata)
+    decompress(header_bytes <> header <> body_binary)
+  end
+
+  def decompress(<<header_bytes::size(@header_length), rest::binary>>) do
+    header_bit_len = header_bytes * @bits_per_byte
+    <<header::size(header_bit_len), body::binary>> = rest
+
+    char_counts = Header.from_binary(<<header::size(header_bit_len)>>)
+
+    root =
+      char_counts
+      |> PriorityQueue.from_map()
+      |> Tree.from_priority_queue()
+
+    IOHelper.decompressed_output(body, root, root, [])
+  end
 end
