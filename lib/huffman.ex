@@ -19,20 +19,28 @@ defmodule Huffman do
 
   def compress(iolist) do
     # Get the character counts for the input. Used to write the header and to build the tree
-    char_counts = Counter.count(iolist)
+    char_counts =
+      iolist
+      |> Counter.count()
+      |> Map.put(<<255::size(8)>>, 1)
 
     # Generate the Huffman header that will be used for decompression
     {header, header_num_bytes} = Header.get_header(char_counts)
 
     # Generate the compressed "body"
-    body =
+    encodings =
       char_counts
       |> PriorityQueue.from_map()
       |> Tree.from_priority_queue()
       |> Tree.inorder()
+
+    eof_encoding = Map.get(encodings, <<255::size(8)>>)
+
+    body =
+      encodings
       |> compressed_output(iolist)
       |> Enum.to_list()
-      |> IOHelper.buffer_output(<<>>, [])
+      |> IOHelper.buffer_output(<<>>, [], eof_encoding)
 
     # Write the header length in the first 32 bits, then the header, then the compressed body
     [<<header_num_bytes::size(@header_length)>>, header, body]
@@ -75,6 +83,10 @@ defmodule Huffman do
     decompressed_output(body, root, root, [])
   end
 
+   def decompressed_output(_rest, _root, %{left: nil, right: nil, character: <<255>>}, iolist) do
+     iolist
+   end
+
   def decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
     decompressed_output(rest, root, root, [iolist, node.character])
   end
@@ -87,6 +99,6 @@ defmodule Huffman do
     decompressed_output(rest, root, node.left, iolist)
   end
 
-  def decompressed_output(<<>>, _root, _tree_node, iolist), do: iolist
+  def decompressed_output(<<>>, _root, _node, iolist), do: iolist
 
 end

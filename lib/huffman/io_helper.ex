@@ -5,7 +5,7 @@ defmodule Huffman.IOHelper do
   # iex(24)> quote(do: <<1::size(1)>> <> <<0::size(1)>>) |> Macro.expand(__ENV__) |> Macro.to_string()
   # "<<(<<1::size(1)>>::binary), (<<0::size(1)>>::binary)>>"
   # this doesn't work because we need to operate on bitstrings
-  def buffer_output([head | tail], buffer, iolist) do
+  def buffer_output([head | tail], buffer, iolist, eof) do
     # Concatenate whatever encoding is next
     buffer = <<buffer::bitstring, head::bitstring>>
 
@@ -24,25 +24,15 @@ defmodule Huffman.IOHelper do
       end
 
     # Keep the recursion going
-    buffer_output(tail, buffer, iolist)
+    buffer_output(tail, buffer, iolist, eof)
   end
 
   # Base of the recursion, we've processed every character
-  def buffer_output([], buffer, iolist) do
-    buffer_size = bit_size(buffer)
-
-    # We need to check if there's anything left in the buffer
-    final_byte =
-      if rem(buffer_size, 8) == 0 do
-        # We got lucky and the leftover buffer is a full byte
-        buffer
-      else
-        # We need to pad the leftover buffer to a full byte
-        pad_len = 8 - buffer_size
-        <<buffer::bitstring, 0::size(pad_len)>>
-      end
-
-    [iolist, final_byte]
+  def buffer_output([], buffer, iolist, eof) do
+    # We need to write the pseudo-EOF character so we know where to stop reading data during decompression
+    buffer = <<buffer::bitstring, eof::bitstring>>
+    final_binary = pad_bitstring(buffer)
+    [iolist, final_binary]
   end
 
   # Check if there's a full byte on the front of the buffer, if so return that byte, and the "rest"
@@ -51,4 +41,12 @@ defmodule Huffman.IOHelper do
 
   # Replace a list of characters with their encodings
   def encode_characters(iodata, encodings), do: Enum.map(iodata, &Map.get(encodings, &1))
+
+  def pad_bitstring(bits) when is_binary(bits), do: bits
+
+  def pad_bitstring(bits) do
+    size = bit_size(bits)
+    pad_len = (8 * ceil(size / 8)) - size
+    <<bits::bitstring, 0::size(pad_len)>>
+  end
 end
