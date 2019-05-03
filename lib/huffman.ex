@@ -38,7 +38,7 @@ defmodule Huffman do
     # Generate the compressed output from the encodings/input data
     {body, buffer} =
       encodings
-      |> IOHelper.compressed_output(iolist)
+      |> compressed_output(iolist)
       |> Enum.to_list()
       |> IOHelper.buffer_output(<<>>, [])
 
@@ -48,6 +48,15 @@ defmodule Huffman do
     eof = IOHelper.pad_bitstring(<<buffer::bitstring, eof_encoding::bitstring>>)
 
     [<<header_num_bytes::size(@header_length)>>, header, body, eof]
+  end
+
+  # Convert some input into its Huffman encoded representation line-by-line
+  defp compressed_output(encodings, iodata) do
+    iodata
+    |> Stream.map(&String.split(&1, ""))
+    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
+    |> Stream.map(&IOHelper.encode_characters(&1, encodings))
+    |> Stream.flat_map(&List.flatten/1)
   end
 
   @spec decompress_file(binary()) :: :ok
@@ -76,6 +85,22 @@ defmodule Huffman do
       |> PriorityQueue.from_map()
       |> Tree.from_priority_queue()
 
-    IOHelper.decompressed_output(body, root, root, [])
+    decompressed_output(body, root, root, [])
+  end
+
+   defp decompressed_output(_rest, _root, %{left: nil, right: nil, character: <<255>>}, iolist) do
+     iolist
+   end
+
+  defp decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
+    decompressed_output(rest, root, root, [iolist, node.character])
+  end
+
+  defp decompressed_output(<<1::size(1), rest::bitstring>>, root, node, iolist) do
+    decompressed_output(rest, root, node.right, iolist)
+  end
+
+  defp decompressed_output(<<0::size(1), rest::bitstring>>, root, node, iolist) do
+    decompressed_output(rest, root, node.left, iolist)
   end
 end

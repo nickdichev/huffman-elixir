@@ -1,15 +1,6 @@
 defmodule Huffman.IOHelper do
   @moduledoc false
 
-  # Convert some input into its Huffman encoded representation line-by-line
-  def compressed_output(encodings, iodata) do
-    iodata
-    |> Stream.map(&String.split(&1, ""))
-    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
-    |> Stream.map(&encode_characters(&1, encodings))
-    |> Stream.flat_map(&List.flatten/1)
-  end
-
   # Format our list of improperly formatted binaries
   # iex(24)> quote(do: <<1::size(1)>> <> <<0::size(1)>>) |> Macro.expand(__ENV__) |> Macro.to_string()
   # "<<(<<1::size(1)>>::binary), (<<0::size(1)>>::binary)>>"
@@ -54,19 +45,4 @@ defmodule Huffman.IOHelper do
     <<bits::bitstring, 0::size(pad_len)>>
   end
 
-   def decompressed_output(_rest, _root, %{left: nil, right: nil, character: <<255>>}, iolist) do
-     iolist
-   end
-
-  def decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
-    decompressed_output(rest, root, root, [iolist, node.character])
-  end
-
-  def decompressed_output(<<1::size(1), rest::bitstring>>, root, node, iolist) do
-    decompressed_output(rest, root, node.right, iolist)
-  end
-
-  def decompressed_output(<<0::size(1), rest::bitstring>>, root, node, iolist) do
-    decompressed_output(rest, root, node.left, iolist)
-  end
 end
