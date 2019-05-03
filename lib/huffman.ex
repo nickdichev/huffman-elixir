@@ -69,9 +69,9 @@ defmodule Huffman do
     File.write!(filename <> ".orig", decompressed_data)
   end
 
-  def decompress([header_bytes, header, iodata] = iolist) when is_list(iolist) do
+  def decompress([header_bytes, header, iodata, eof] = iolist) when is_list(iolist) do
     body_binary = IO.iodata_to_binary(iodata)
-    decompress(header_bytes <> header <> body_binary)
+    decompress(header_bytes <> header <> body_binary <> eof)
   end
 
   def decompress(<<header_bytes::size(@header_length), rest::binary>>) do
