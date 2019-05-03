@@ -50,6 +50,7 @@ defmodule Huffman do
     [<<header_num_bytes::size(@header_length)>>, header, body, eof]
   end
 
+  @spec decompress_file(binary()) :: :ok
   def decompress_file(filename) do
     decompressed_data =
       filename
