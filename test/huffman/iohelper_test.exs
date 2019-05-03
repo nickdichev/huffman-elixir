@@ -2,12 +2,16 @@ defmodule Huffman.IOHelperTest do
   use ExUnit.Case, async: true
   alias Huffman.IOHelper
 
-  test "buffers a completed byte onto the iolist" do
+  test "buffers output into a binary and leftover buffer" do
     bitstrings = [<<1::size(2), 3::size(3)>>]
 
     result = IOHelper.buffer_output(bitstrings, <<2::size(6)>>, [])
     expected = {[[], 9], <<3::size(3)>>}
     assert expected == result
+  end
+
+  test "buffer output base case" do
+    assert {["a"], <<3::size(2)>>} == IOHelper.buffer_output([], <<3::size(2)>>, ["a"])
   end
 
   test "completed_byte chomps a completed byte" do
