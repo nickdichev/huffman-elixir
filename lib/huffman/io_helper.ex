@@ -2,7 +2,7 @@ defmodule Huffman.IOHelper do
   @moduledoc false
 
   @doc """
-  Format a list of bitstrings into a list of binaries and the remaining output. We need to format the compressed
+  Pad a list of bitstrings into a list of binaries and the remaining output. We need to format the compressed
   data (which are all bitstring) into binaries so we can write it. The leftover buffer should have the EOF characater
   appended and padded to a binary.
 
@@ -14,6 +14,10 @@ defmodule Huffman.IOHelper do
   # iex(24)> quote(do: <<1::size(1)>> <> <<0::size(1)>>) |> Macro.expand(__ENV__) |> Macro.to_string()
   # "<<(<<1::size(1)>>::binary), (<<0::size(1)>>::binary)>>"
   ```
+
+  ## Examples
+    iex> Huffman.IOHelper.buffer_output([<<4, 1::size(2), 0::size(2)>>], <<>>, [])
+    {[[], 4], <<4::size(4)>>}
   """
   @spec buffer_output([bitstring(), ...] | [], bitstring(), iolist()) :: {iolist(), bitstring()}
   def buffer_output([head | tail], buffer, iolist) do
@@ -41,18 +45,41 @@ defmodule Huffman.IOHelper do
   # Base of the recursion, we've processed every character
   def buffer_output([], buffer, iolist), do: {iolist, buffer}
 
-  # Check if there's a full byte on the front of the buffer, if so return that byte, and the "rest"
+  @doc """
+  Check if there is a full byte on the front of the buffer, if so return that byte and the "rest"
+
+  ## Examples
+    iex> Huffman.IOHelper.completed_byte(<<4, 1::size(1)>>)
+    {4, <<1::size(1)>>}
+
+    iex> Huffman.IOHelper.completed_byte(<<1::size(1)>>)
+    {nil, nil}
+  """
   @spec completed_byte(bitstring()) :: {byte(), bitstring()} | {nil, nil}
   def completed_byte(<<byte::size(8), rest::bitstring>>), do: {byte, rest}
   def completed_byte(_), do: {nil, nil}
 
   # Replace a list of characters with their encodings
+  @doc """
+  Replace a list of characters with their encodings.
+
+  ## Examples
+    iex> Huffman.IOHelper.encode_characters(["a", "b"], %{"a" => <<1::size(2)>>, "b" => <<0::size(2)>>})
+    [<<1::size(2)>>, <<0::size(2)>>]
+  """
   @spec encode_characters(iolist(), map()) :: iolist()
   def encode_characters(iolist, encodings), do: Enum.map(iolist, &Map.get(encodings, &1))
 
   @doc """
   Pads a bitstring into a binary if required. The bistring is padded with zeros in the least significant
   digits of the bitstring, to the nearest multiple of 8 bits.
+
+  ## Examples
+    iex> Huffman.IOHelper.pad_bitstring(<<3, 4>>)
+    <<3, 4>>
+
+    iex> Huffman.IOHelper.pad_bitstring(<<3::size(3)>>)
+    <<3::size(3), 0::size(5)>>
   """
   @spec pad_bitstring(bitstring()) :: bitstring()
   def pad_bitstring(bits) when is_binary(bits), do: bits

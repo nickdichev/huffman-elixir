@@ -1,5 +1,6 @@
 defmodule Huffman.IOHelperTest do
   use ExUnit.Case, async: true
+  doctest Huffman.IOHelper
   alias Huffman.IOHelper
 
   test "buffers output into a binary and leftover buffer" do
