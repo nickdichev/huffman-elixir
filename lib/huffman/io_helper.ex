@@ -1,10 +1,21 @@
 defmodule Huffman.IOHelper do
   @moduledoc false
 
-  # Format our list of improperly formatted binaries
+  @doc """
+  Format a list of bitstrings into a list of binaries and the remaining output. We need to format the compressed
+  data (which are all bitstring) into binaries so we can write it. The leftover buffer should have the EOF characater
+  appended and padded to a binary.
+
+  Note that we need to use bitstrings when creating the buffered binaries here since we are working with
+  bitstrings. The typical binary concatenation operator <> won't work since we have bitstrings. To see why
+  try expanding the <> macro:
+
+  ```
   # iex(24)> quote(do: <<1::size(1)>> <> <<0::size(1)>>) |> Macro.expand(__ENV__) |> Macro.to_string()
   # "<<(<<1::size(1)>>::binary), (<<0::size(1)>>::binary)>>"
-  # this doesn't work because we need to operate on bitstrings
+  ```
+  """
+  @spec buffer_output([bitstring(), ...] | [], bitstring(), iolist()) :: {iolist(), bitstring()}
   def buffer_output([head | tail], buffer, iolist) do
     # Concatenate whatever encoding is next
     buffer = <<buffer::bitstring, head::bitstring>>
@@ -31,12 +42,19 @@ defmodule Huffman.IOHelper do
   def buffer_output([], buffer, iolist), do: {iolist, buffer}
 
   # Check if there's a full byte on the front of the buffer, if so return that byte, and the "rest"
+  @spec completed_byte(bitstring()) :: {byte(), bitstring()} | {nil, nil}
   def completed_byte(<<byte::size(8), rest::bitstring>>), do: {byte, rest}
   def completed_byte(_), do: {nil, nil}
 
   # Replace a list of characters with their encodings
-  def encode_characters(iodata, encodings), do: Enum.map(iodata, &Map.get(encodings, &1))
+  @spec encode_characters(iolist(), map()) :: iolist()
+  def encode_characters(iolist, encodings), do: Enum.map(iolist, &Map.get(encodings, &1))
 
+  @doc """
+  Pads a bitstring into a binary if required. The bistring is padded with zeros in the least significant
+  digits of the bitstring, to the nearest multiple of 8 bits.
+  """
+  @spec pad_bitstring(bitstring()) :: bitstring()
   def pad_bitstring(bits) when is_binary(bits), do: bits
 
   def pad_bitstring(bits) do
