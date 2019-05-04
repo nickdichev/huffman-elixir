@@ -9,7 +9,7 @@ defmodule Huffman.PriorityQueue do
   # build the queue, and when elements are inserted. The function is private since we
   # should _always_ return a queue sorted by weight to the caller.
   defp sort([]), do: []
-  defp sort(queue), do: Enum.sort(queue, &sort(&1, &2))
+  defp sort(queue), do: Enum.sort(queue, &sort/2)
   defp sort(%{weight: weight_left}, %{weight: weight_right}), do: weight_left <= weight_right
 
   @doc """
