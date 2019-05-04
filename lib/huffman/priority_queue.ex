@@ -45,10 +45,10 @@ defmodule Huffman.PriorityQueue do
     {%Huffman.TreeNode{character: "c", weight: 0}, [%Huffman.TreeNode{character: "b", weight: 1}]}
 
     iex> Huffman.PriorityQueue.pop([])
-    {}
+    nil
   """
   @spec pop(priority_queue()) :: {queue_elem(), priority_queue()} | {}
-  def pop([]), do: {}
+  def pop([]), do: nil
   def pop([head | tail]), do: {head, tail}
 
   @doc """
