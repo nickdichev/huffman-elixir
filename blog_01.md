@@ -45,9 +45,11 @@ With ASCII we need 56 bits to store the string, however, with our encoding we on
 
 However, Huffman realized he could do better. Notice that the characters 'g', 'o', and ' ' occur more frequently than the rest of the characters in our example string. Huffman's algorithim creates a more efficient encoding by assigning smaller (less bits) encodings to characters which occur more frequently. Let's take a look at the data structures we will need to create to implement Huffman's algorithim.
 
-## Data Structures
+## Data Structures -- Explanation
 
 There are two data structures that we need to implement -- a binary tree and a priority queue. I will not cover the intricacies of these data structures. There are plenty of resources online if you are unfamiliar or need a refresher on the details of these data structures. However, let's take a look at the basics.
+
+### Binary Tree
 
 A binary tree node is a singular element which can contain some data and pointers to up to two "children" elements. A node's children can have its own children. A collection of binary tree nodes form a binary tree. However, a binary tree is typically only represented by a singular tree node -- the "root" of the binary tree. The entire binary tree can be iterated over by looking at the children of the root node, the children of those nodes, and so on. Nodes with no children are called leaf nodes.
 
@@ -71,6 +73,8 @@ A binary tree node is a singular element which can contain some data and pointer
 
 ```
 
+### Priority Queue
+
 A priority queue is similar to a queue, however, the queue is sorted by priority. Consider the following queue operations:
 
 ```elixir
@@ -89,4 +93,60 @@ Since a queue is a first-in-first-out data structure, elements are removed in th
 {priority: 1}, [{priority: 1}] :: dequeue
 ```
 
-Notice that in the priority queue elements are placed into the queue depending on their priority. This also means that elements are removed from the queue in order of priority.
+Notice that in the priority queue elements are placed into the queue depending on their priority. This also means that elements are removed from the queue in order of priority. 
+
+Now that we have an understanding of the data structures, lets take a look at how we can implement them in Elixir.
+
+## Data Structures -- Implementation
+
+Let' start by creating a new mix project, and creating a file for our implementation of the binary tree node.
+
+```bash
+mix new huffman
+touch lib/huffman/TreeNode.ex
+```
+
+We will be using a struct to represent the tree nodes. In Elixir, a struct is similar to a map, however, it has tagged keys. For our tree node, we want to store a character, a weight (the character's frequency), and the left and right children.
+
+Let's open `TreeNode.ex`, create a module, define a struct and a function to create a node with some data:
+
+```elixir
+defmodule Huffman.TreeNode do
+  defstruct [:character, :left, :right, weight: 0]
+  alias __MODULE__
+
+  def from_tuple({character, weight}) do
+    %TreeNode{
+      character: character,
+      weight: weight
+    }
+  end
+
+end
+```
+
+Let's open an `iex` shell and create some structs:
+
+```elixir
+iex(1)> %Huffman.TreeNode{}
+%Huffman.TreeNode{character: nil, left: nil, right: nil, weight: 0}
+
+iex(2)> Huffman.TreeNode.from_tuple({"a", 4})
+%Huffman.TreeNode{character: "a", left: nil, right: nil, weight: 4}
+
+iex(3)> Huffman.TreeNode.from_tuple({"b", 2})
+%Huffman.TreeNode{character: "b", left: nil, right: nil, weight: 2}
+```
+
+We'll also need a function to merge two nodes into a singular parent node:
+
+```elixir
+defmodule Huffman.TreeNode do
+  ...
+
+  def merge(left_child, right_child) do
+    weight = left_child.weight + right_child.weight
+    %TreeNode{weight: weight, left: left_child, right: right_child}
+  end
+end
+```
