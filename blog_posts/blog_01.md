@@ -4,7 +4,7 @@ In the talk [The Mess We're In](https://www.youtube.com/watch?v=lKXe3HUG2l4), Jo
 
 This post is the first in a series which will be exploring powerful, although seemingly basic, features of the Elixir programming language which make implementing the Huffman algorithm a breeze. Some of features we will look into are: binary pattern matching, iolists, and recursion.
 
-This post will serve as an introduction to the Huffman algorithm and the data structures we will be using to implement the the algorithm.
+This post will serve as an introduction to the Huffman algorithm and the data structures we will be using to implement the the algorithm. You can find the full code with comments, typespecs, and tests on [Github](https://github.com/nickdichev/huffman-elixir).
 
 ## Introduction
 
