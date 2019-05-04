@@ -37,14 +37,12 @@ defmodule Huffman do
       |> Map.put(<<255>>, 1)
 
     # Generate the Huffman header that will be used for decompression
-    {header, header_num_bytes} = Header.get_header(char_counts)
+    header_task = Task.async(Header, :get_header, [char_counts])
 
     # Generate the Huffman encodings from the character counts
-    encodings =
-      char_counts
-      |> PriorityQueue.from_map()
-      |> Tree.from_priority_queue()
-      |> Tree.inorder()
+    encodings = get_encodings(char_counts)
+
+    {header, header_num_bytes} = Task.await(header_task)
 
     # Generate the compressed output from the encodings/input data
     {body, buffer} =
@@ -59,6 +57,13 @@ defmodule Huffman do
     eof = IOHelper.pad_bitstring(<<buffer::bitstring, eof_encoding::bitstring>>)
 
     [<<header_num_bytes::size(@header_length)>>, header, body, eof]
+  end
+
+  defp get_encodings(char_counts) do
+      char_counts
+      |> PriorityQueue.from_map()
+      |> Tree.from_priority_queue()
+      |> Tree.inorder()
   end
 
   # Convert some input into its Huffman encoded representation line-by-line
