@@ -8,7 +8,7 @@ defmodule Huffman do
   @doc """
   Compresses an input file. The output file is the original filename with ".hf" appended.
   """
-  @spec compress_file(binary()) :: :ok | {:error, :file.posix()}
+  @spec compress_file(binary()) :: :ok
   def compress_file(filename) when is_binary(filename) do
     compressed_data =
       filename
@@ -21,16 +21,16 @@ defmodule Huffman do
   @doc """
   Compresses an input binary. An iolist of the compressed output is returned.
   """
-  @spec compress(binary()) :: list(binary())
+  @spec compress(binary() | iolist() | %File.Stream{}) :: list(binary())
   def compress(bin) when is_binary(bin), do: compress([bin])
 
   @doc """
   Compresses an input iolist. An iolist of the compressed output is returned.
   """
-  @spec compress(iolist() | %File.Stream{}) :: list(binary())
   def compress(iolist) do
     # Get the character counts for the input. Used to write the header and to build the tree
-    # We also need to add the EOF so we can get an encoding for it, and store it in the header
+    # We also need to add the EOF to the char counts so we can get an encoding for it, to be stored
+    # in the header
     char_counts =
       iolist
       |> Counter.count()
