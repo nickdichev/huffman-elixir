@@ -46,3 +46,47 @@ With ASCII we need 56 bits to store the string, however, with our encoding we on
 However, Huffman realized he could do better. Notice that the characters 'g', 'o', and ' ' occur more frequently than the rest of the characters in our example string. Huffman's algorithim creates a more efficient encoding by assigning smaller (less bits) encodings to characters which occur more frequently. Let's take a look at the data structures we will need to create to implement Huffman's algorithim.
 
 ## Data Structures
+
+There are two data structures that we need to implement -- a binary tree and a priority queue. I will not cover the intricacies of these data structures. There are plenty of resources online if you are unfamiliar or need a refresher on the details of these data structures. However, let's take a look at the basics.
+
+A binary tree node is a singular element which can contain some data and pointers to up to two "children" elements. A node's children can have its own children. A collection of binary tree nodes form a binary tree. However, a binary tree is typically only represented by a singular tree node -- the "root" of the binary tree. The entire binary tree can be iterated over by looking at the children of the root node, the children of those nodes, and so on. Nodes with no children are called leaf nodes.
+
+```bash
+                +---------------------------+
+                |         Data: "a"         |
+                |                           |   < Root
+                |Left Child      Right Child|
+                +-+----------------------+--+
+                  |                      |
+                  |                      |
+   +--------------+----------+       +---+---------------------+
+   |        Data:  "b"       |       |        Data: "c"        |
+   |                         |       |                         |   < Leaf node
+   |Left Child    Right Child|       |Left Child    Right child|
+   +---+----------------+----+       +----+----------------+---+
+       |                |                 |                |
++------+------+   +-----+------+   +------+-----+    +-----+------+
+|    nil      |   |    nil     |   |    nil     |    |    nil     |
++-------------+   +------------+   +------------+    +------------+
+
+```
+
+A priority queue is similar to a queue, however, the queue is sorted by priority. Consider the following queue operations:
+
+```elixir
+[] :: initial queue
+[{priority: 3}] :: insert with priority 3
+[{priority: 3}, {priority: 1}] :: insert with priority 1
+{priority: 3}, [{priority: 1}] :: dequeue
+```
+
+Since a queue is a first-in-first-out data structure, elements are removed in the order which they were placed in the queue. Since we inserted the element with priorty 3 before the element with priorty 1, it came off the queue first. Consider the same operations on a priority queue:
+
+```elixir
+[] :: initial queue
+[{priority: 3}] :: insert with priority 3
+[{priority: 1}, {priority: 3}] :: insert with priority 1
+{priority: 1}, [{priority: 1}] :: dequeue
+```
+
+Notice that in the priority queue elements are placed into the queue depending on their priority. This also means that elements are removed from the queue in order of priority.
