@@ -50,7 +50,7 @@ defmodule Huffman.PriorityQueueTest do
 
   test "pops off empty queue" do
     result = PriorityQueue.pop([])
-    assert {} == result
+    assert nil == result
   end
 
   test "insert element into a queue" do

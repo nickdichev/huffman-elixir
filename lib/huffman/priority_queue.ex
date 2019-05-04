@@ -9,7 +9,7 @@ defmodule Huffman.PriorityQueue do
   # build the queue, and when elements are inserted. The function is private since we
   # should _always_ return a queue sorted by weight to the caller.
   defp sort([]), do: []
-  defp sort(queue), do: Enum.sort(queue, &sort(&1, &2))
+  defp sort(queue), do: Enum.sort(queue, &sort/2)
   defp sort(%{weight: weight_left}, %{weight: weight_right}), do: weight_left <= weight_right
 
   @doc """
@@ -45,10 +45,10 @@ defmodule Huffman.PriorityQueue do
     {%Huffman.TreeNode{character: "c", weight: 0}, [%Huffman.TreeNode{character: "b", weight: 1}]}
 
     iex> Huffman.PriorityQueue.pop([])
-    {}
+    nil
   """
   @spec pop(priority_queue()) :: {queue_elem(), priority_queue()} | {}
-  def pop([]), do: {}
+  def pop([]), do: nil
   def pop([head | tail]), do: {head, tail}
 
   @doc """
