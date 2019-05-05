@@ -1,6 +1,14 @@
 # huffman-elixir
 
-This repository contains an implementation of the Huffman algorithm in Elixir. You can run the program in an `iex` shell:
+This repository contains an implementation of the Huffman algorithm in Elixir.
+
+A blog post series describing the implementation of the algorithm can be found on my blog:
+
+[Part 1 (Data Structures)](https://nickdichev.com/blog/2019/05/04/huffman-elixir-part1)
+
+## Usage
+
+You can run the program in an `iex` shell:
 
 ```bash
 iex -S mix
