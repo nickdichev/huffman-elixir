@@ -53,3 +53,7 @@ ls -lh test_data/hamlet*
 diff test_data/hamlet test_data/hamlet.hf.orig
 <no  output>
 ```
+
+## Testing
+
+There are some unit tests in `tests/`. The unit test suite can be run with `mix test`. Additionally, `excoveralls` is configured and can be run with `mix coveralls` or `mix coveralls.html`.
