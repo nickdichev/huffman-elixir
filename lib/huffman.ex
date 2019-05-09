@@ -27,12 +27,12 @@ defmodule Huffman do
   @doc """
   Compresses an input iolist. An iolist of the compressed output is returned.
   """
-  def compress(iolist) do
+  def compress(input) do
     # Get the character counts for the input. Used to write the header and to build the tree
     # We also need to add the EOF to the char counts so we can get an encoding for it, to be stored
     # in the header
     char_counts =
-      iolist
+      input
       |> Counter.count()
       |> Map.put(<<255>>, 1)
 
@@ -47,7 +47,7 @@ defmodule Huffman do
     # Generate the compressed output from the encodings/input data
     {body, buffer} =
       encodings
-      |> compressed_output(iolist)
+      |> compressed_output(input)
       |> Enum.to_list()
       |> IOHelper.buffer_output(<<>>, [])
 
@@ -67,8 +67,8 @@ defmodule Huffman do
   end
 
   # Convert some input into its Huffman encoded representation line-by-line
-  defp compressed_output(encodings, iodata) do
-    iodata
+  defp compressed_output(encodings, input) do
+    input
     |> Stream.map(&String.split(&1, ""))
     |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
     |> Stream.map(&IOHelper.encode_characters(&1, encodings))
