@@ -6,6 +6,8 @@ A blog post series describing the implementation of the algorithm can be found o
 
 [Part 1 (Data Structures)](https://nickdichev.com/blog/2019/05/04/huffman-elixir-part1)
 
+[Part 2 (Compression)](https://nickdichev.com/blog/2019/05/11/huffman-elixir-part2)
+
 ## Usage
 
 You can run the program in an `iex` shell:
