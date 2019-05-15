@@ -28,18 +28,8 @@ iex(1)> gophers = Huffman.compress("go go gophers")
   [[[[[], 26], 52], 122], 99],
   <<243, 64>>
 ]
-
-iex(2)> Huffman.decompress(gophers)
-[
-  [
-    [
-      [[[[[[[[[[[], "g"], "o"], " "], "g"], "o"], " "], "g"], "o"], "p"], "h"],
-      "e"
-    ],
-    "r"
-  ],
-  "s"
-]
+iex(2)> Huffman.decompress(gophers) |> IO.iodata_to_binary()
+"go go gophers"
 ```
 
 There are also some sample text files included in `test_data/`. They can be compressed/decompressed as follows:
