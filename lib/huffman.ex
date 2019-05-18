@@ -3,13 +3,12 @@ defmodule Huffman do
   @moduledoc false
 
   @header_length 32
-  @bits_per_byte 8
 
   @doc """
   Compresses an input file. The output file is the original filename with ".hf" appended.
   """
   @spec compress_file(binary()) :: :ok
-  def compress_file(filename) when is_binary(filename) do
+  def compress_file(filename) do
     compressed_data =
       filename
       |> File.stream!()
@@ -103,10 +102,9 @@ defmodule Huffman do
   """
   @spec decompress(binary()) :: iolist()
   def decompress(<<header_bytes::size(@header_length), rest::binary>>) do
-    header_bit_len = header_bytes * @bits_per_byte
-    <<header::size(header_bit_len), body::binary>> = rest
+    <<header::bytes-size(header_bytes), body::binary>> = rest
 
-    char_counts = Header.from_binary(<<header::size(header_bit_len)>>)
+    char_counts = Header.from_binary(header)
 
     root =
       char_counts
@@ -121,7 +119,7 @@ defmodule Huffman do
      iolist
    end
 
-   # Base case of decompression, append the character of the current leaf node to the iolist.
+   # Append the character of the current leaf node to the iolist.
   defp decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
     decompressed_output(rest, root, root, [iolist, node.character])
   end
