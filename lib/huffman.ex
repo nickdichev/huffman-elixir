@@ -68,8 +68,7 @@ defmodule Huffman do
   # Convert some input into its Huffman encoded representation line-by-line
   defp compressed_output(encodings, input) do
     input
-    |> Stream.map(&String.split(&1, ""))
-    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
+    |> Stream.map(&String.split(&1, "", trim: true))
     |> Stream.map(&IOHelper.encode_characters(&1, encodings))
     |> Stream.flat_map(&List.flatten/1)
   end

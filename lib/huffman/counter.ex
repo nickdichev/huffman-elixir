@@ -19,8 +19,7 @@ defmodule Huffman.Counter do
 
   def count(binaries) do
     binaries
-    |> Stream.map(&String.split(&1, ""))
-    |> Stream.map(&Enum.filter(&1, fn x -> x != "" end))
+    |> Stream.map(&String.split(&1, "", trim: true))
     |> Stream.map(&count_helper(&1, %{}))
     |> Enum.reduce(&merge_maps(&1, &2))
   end
