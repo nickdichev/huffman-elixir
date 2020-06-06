@@ -35,10 +35,8 @@ defmodule Huffman do
       |> Counter.count()
       |> Map.put(<<255>>, 1)
 
-    # Generate the Huffman header that will be used for decompression
     header_task = Task.async(Header, :get_header, [char_counts])
 
-    # Generate the Huffman encodings from the character counts
     encodings = get_encodings(char_counts)
 
     {header, header_num_bytes} = Task.await(header_task)
@@ -59,10 +57,10 @@ defmodule Huffman do
   end
 
   defp get_encodings(char_counts) do
-      char_counts
-      |> PriorityQueue.from_map()
-      |> Tree.from_priority_queue()
-      |> Tree.inorder()
+    char_counts
+    |> PriorityQueue.from_map()
+    |> Tree.from_priority_queue()
+    |> Tree.inorder()
   end
 
   # Convert some input into its Huffman encoded representation line-by-line
@@ -114,11 +112,11 @@ defmodule Huffman do
   end
 
   # Final base case of decompression, at a leaf node that is the EOF character.
-   defp decompressed_output(_rest, _root, %{left: nil, right: nil, character: <<255>>}, iolist) do
-     iolist
-   end
+  defp decompressed_output(_rest, _root, %{left: nil, right: nil, character: <<255>>}, iolist) do
+    iolist
+  end
 
-   # Append the character of the current leaf node to the iolist.
+  # Append the character of the current leaf node to the iolist.
   defp decompressed_output(rest, root, %{left: nil, right: nil} = node, iolist) do
     decompressed_output(rest, root, root, [iolist, node.character])
   end
