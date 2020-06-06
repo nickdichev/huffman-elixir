@@ -7,12 +7,12 @@ defmodule Huffman do
   @doc """
   Compresses an input file. The output file is the original filename with ".hf" appended.
   """
-  @spec compress_file(binary()) :: :ok
-  def compress_file(filename) do
+  @spec compress_file(binary(), keyword()) :: :ok
+  def compress_file(filename, opts \\ []) do
     compressed_data =
       filename
       |> File.stream!()
-      |> compress()
+      |> compress(opts)
 
     File.write!(filename <> ".hf", compressed_data)
   end
@@ -20,19 +20,21 @@ defmodule Huffman do
   @doc """
   Compresses an input binary. An iolist of the compressed output is returned.
   """
-  @spec compress(binary() | iolist() | %File.Stream{}) :: list(binary())
-  def compress(bin) when is_binary(bin), do: compress([bin])
+  @spec compress(binary() | iolist() | %File.Stream{}, keyword()) :: list(binary())
+  def compress(bin, opts) when is_binary(bin), do: compress([bin], opts)
 
   @doc """
   Compresses an input iolist. An iolist of the compressed output is returned.
   """
-  def compress(input) do
+  def compress(input, opts) do
+    counter_opts = Keyword.take(opts, [:flow?])
+
     # Get the character counts for the input. Used to write the header and to build the tree
     # We also need to add the EOF to the char counts so we can get an encoding for it, to be stored
     # in the header
     char_counts =
       input
-      |> Counter.count()
+      |> Counter.count(counter_opts)
       |> Map.put(<<255>>, 1)
 
     header_task = Task.async(Header, :get_header, [char_counts])
